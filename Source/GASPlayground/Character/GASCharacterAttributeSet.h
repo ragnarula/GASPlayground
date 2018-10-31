@@ -38,4 +38,6 @@ public:
 
 	void OnEffectAppliedToTarget(UAbilitySystemComponent* ASC, const FGameplayEffectSpec& Spec, FActiveGameplayEffectHandle Handle);
 
+	void OnHealthChange(const FOnAttributeChangeData& ChanegData);
+
 };

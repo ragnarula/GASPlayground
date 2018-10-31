@@ -23,24 +23,23 @@ void UGASCharacterAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetim
 
 bool UGASCharacterAttributeSet::PreGameplayEffectExecute(struct FGameplayEffectModCallbackData &Data)
 {
-	UE_LOG(LogTemp, Warning, TEXT("PreGameplayEffectExecute"));
+	UE_LOG(LogTemp, Warning, TEXT("PreGameplayEffectExecute -- CurrentHealth: %f"), Health.GetCurrentValue());
 	return true;
 }
 
 void UGASCharacterAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData &Data)
 {
-	UE_LOG(LogTemp, Warning, TEXT("PostGameplayEffectExecute"));
+	UE_LOG(LogTemp, Warning, TEXT("PostGameplayEffectExecute -- CurrentHealth: %f"), Health.GetCurrentValue());
 }
 
 void UGASCharacterAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
-	UE_LOG(LogTemp, Warning, TEXT("PreAttributeChange"));
-	NewValue = 0.f;
+	UE_LOG(LogTemp, Warning, TEXT("PreAttributeChange -- CurrentHealth: %f, NewHealth: %f"), Health.GetCurrentValue(), NewValue);
 }
 
 void UGASCharacterAttributeSet::PreAttributeBaseChange(const FGameplayAttribute& Attribute, float& NewValue) const
 {
-	UE_LOG(LogTemp, Warning, TEXT("PreAttributeBaseChange"));
+	UE_LOG(LogTemp, Warning, TEXT("PreAttributeBaseChange -- CurrentHealth: %f, NewValue: %f"), Health.GetCurrentValue(), NewValue);
 }
 
 void UGASCharacterAttributeSet::PostInitProperties()
@@ -54,22 +53,22 @@ void UGASCharacterAttributeSet::PostInitProperties()
 
 	GetOwningAbilitySystemComponent()->OnGameplayEffectAppliedDelegateToSelf.AddUObject(this, &UGASCharacterAttributeSet::OnEffectAppliedToSelf);
 	GetOwningAbilitySystemComponent()->OnGameplayEffectAppliedDelegateToTarget.AddUObject(this, &UGASCharacterAttributeSet::OnEffectAppliedToTarget);
+	GetOwningAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(AttributeHealth()).AddUObject(this, &UGASCharacterAttributeSet::OnHealthChange);
 }
-
 
 void UGASCharacterAttributeSet::OnEffectAppliedToSelf(UAbilitySystemComponent* ASC, const FGameplayEffectSpec& Spec, FActiveGameplayEffectHandle Handle)
 {
-	const FActiveGameplayEffect* ActiveEffect1 = ASC->GetActiveGameplayEffect(Handle);
-	const FActiveGameplayEffect* ActiveEffect2 = GetOwningAbilitySystemComponent()->GetActiveGameplayEffect(Handle);
-
-	float HealthChange = ASC->GetGameplayEffectMagnitude(Handle, AttributeHealth());
-	
-	UE_LOG(LogTemp, Warning, TEXT("OnEffeftAppliedToSelf: HealthChange: %f"), HealthChange);
+	UE_LOG(LogTemp, Warning, TEXT("OnEffectAppliedToSelf -- CurrentHealth: %f"), Health.GetCurrentValue());
 }
 
 void UGASCharacterAttributeSet::OnEffectAppliedToTarget(UAbilitySystemComponent* ASC, const FGameplayEffectSpec& Spec, FActiveGameplayEffectHandle Handle)
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnEffectAppliedToTarget"));
+	UE_LOG(LogTemp, Warning, TEXT("OnEffectAppliedToTarget -- CurrentHealth: %f"), Health.GetCurrentValue());
+}
+
+void UGASCharacterAttributeSet::OnHealthChange(const FOnAttributeChangeData& ChanegData)
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnHealthChange -- CurrentHealth: %f, ModData: %s"), Health.GetCurrentValue(), ChanegData.GEModData ? TEXT("True") : TEXT("False"));
 }
 
 #pragma optimize("", on)
